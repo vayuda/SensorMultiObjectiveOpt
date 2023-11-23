@@ -2,13 +2,12 @@ import tkinter as tk
 
 
 class GridWorld:
-    def __init__(self, start,goal, grid, cell_size=50):
+    def __init__(self, start,goal, grid):
         self.rows =len(grid)
         self.cols = len(grid[0])
         self.start = start
         self.goal = goal
         self.goal_reached = False
-        self.cell_size = cell_size
         self.agent_location = start
         self.grid = grid
 
@@ -31,6 +30,13 @@ class GridWorld:
         if y < self.rows - 1 and self.grid[y+1][x] != 'w':
             actions.append((0,1))
         return actions
+
+    def is_terminal(self):
+        return self.agent_location == self.goal
+    
+    def reset(self):
+        self.agent_location = self.start
+        self.goal_reached = False
 
 
 
