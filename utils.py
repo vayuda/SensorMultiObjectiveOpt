@@ -2,6 +2,69 @@ import random
 from collections import namedtuple
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
+import json
+
+def graph_training_rewards(save_path):
+    with open(save_path+'results.json', 'r') as f:
+        results = json.load(f)
+        for result in results:
+            l = max(1,int(len(result['a1 train'])/100))
+            plt.plot(SMA(result['a1 train'], l), label=f'{result["a1 model name"]} {result["name"]}',color='green')
+            plt.plot(SMA(result['a2 train'], l), label=f'{result["a2 model name"]} {result["name"]}',color='orange')
+            plt.legend()
+            plt.xlabel('Episode Number')
+            plt.ylabel(f'Episode Reward')
+            plt.savefig(f'{save_path}{result["name"]}_train.png')
+            plt.clf()
+
+
+def graph_test_rewards(save_path):
+    with open(save_path+'results.json', 'r') as f:
+        results = json.load(f)
+        for result in results:
+            l = max(1,int(len(result['a1 test'])/100))
+            plt.plot(SMA(result['a1 test'], l), label=f'{result["a1 model name"]} {result["name"]}',color='green')
+            plt.plot(SMA(result['a2 test'], l), label=f'{result["a2 model name"]} {result["name"]}',color='orange')
+            plt.legend()
+            plt.xlabel('Training Checkpoint')
+            plt.ylabel(f'Test Episode Reward')
+            plt.savefig(f'{save_path}{result["name"]}_test.png')
+            plt.clf()
+
+
+def visualize_policy(env, agent):
+    for i in range(env.cfg['grid size']):
+        for j in range(env.cfg['grid size']):
+            traj = [0]*(env.cfg['trajectory_length']-2)
+            traj.append(i)
+            traj.append(j)
+            if agent.max_action(traj) == (1,0):
+                print("0", end=" ")
+            else:
+                print("1", end=" ")
+        print()
+
+
+def square_print(input_string, side_length):
+    charGrid = [[" " for _ in range(side_length)] for _ in range(side_length)]
+    directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]  # right, down, left, up
+    curX = curY = cur = 0
+
+    for dx, dy in directions:
+        for _ in range(side_length-1):
+            charGrid[curY][curX] = input_string[cur]
+            cur += 1
+            curX += dx
+            curY += dy
+    for row in charGrid:
+        print("".join(row))
+
+def SMA(data, window_size):
+    if len(data) < window_size:
+        raise ValueError("Data size must be greater than or equal to the window size.")
+    return np.convolve(data, np.ones(window_size)/window_size, mode='valid')
+
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 class ReplayBuffer:
@@ -21,12 +84,11 @@ class ReplayBuffer:
     
 
 """
+# Modified from https://github.com/labmlai/annotated_deep_learning_paper_implementations/tree/master
 This implements paper [Prioritized experience replay](https://papers.labml.ai/paper/1511.05952),
 using a binary segment tree.
 """
 
-
-# Modified from https://github.com/labmlai/annotated_deep_learning_paper_implementations/tree/master
 class PERBuffer:
     """
     ## Buffer for Prioritized Experience Replay

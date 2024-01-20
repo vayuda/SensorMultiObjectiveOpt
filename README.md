@@ -15,8 +15,14 @@ The reward for the agent is a simple linear combination as follows:
 reward = w1 * (number of unique positions sensed / number of unique positions visited) - self.w2 * (1 if sensor was activated, else 0)
 
 Directory Structure:
-gridworld.py contains code for simulating the environment
-agent.py contains code for the handcrafted agent and the Q-agent
-sim.ipynb contains code for running the simulation described above
+main.py is the entry point for the program
+args.py contains all the configurable parameters
+model_loader.py contains code to initialize the models
+env.py contains code for simulating the environment
+agent.py defines various agent models
+user.py defines various user models
+train.py defines how the models are trained
+utils.py contains various helper functions
+
 
 
